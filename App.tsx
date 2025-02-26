@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator } from 'react-native';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { FirebaseAuthTypes, getAuth, onAuthStateChanged } from '@react-native-firebase/auth';
 import GoogleSignInScreen from './src/screens/GoogleSignInScreen';
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 
@@ -11,12 +11,13 @@ const Stack = createStackNavigator();
 function App(): React.JSX.Element {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState<string>('GoogleSignInScreen');
 
   useEffect(() => {
-
-    const unsubscribe = auth().onAuthStateChanged((user) => {
-      console.log("onAuthStateChanged ->  Kullanıcı:", user);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user: FirebaseAuthTypes.User | null) => {
       setUser(user);
+      setInitialRoute(user ? 'BottomTabNavigator' : 'GoogleSignInScreen');
       setLoading(false);
     });
 
@@ -31,16 +32,11 @@ function App(): React.JSX.Element {
     );
   }
 
-  console.log("Kullanıcı durumu:", user ? "GİRİŞ YAPILMIŞ" : "GİRİŞ YAPILMAMIŞ");
-
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!user ? (
-          <Stack.Screen name="GoogleSignIn" component={GoogleSignInScreen} />
-        ) : (
-          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-        )}
+      <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="GoogleSignInScreen" component={GoogleSignInScreen} />
+        <Stack.Screen name="BottomTabNavigator" component={BottomTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

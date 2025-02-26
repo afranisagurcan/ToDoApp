@@ -1,23 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Button, Alert } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 const Profile: React.FC = () => {
-  const user = auth().currentUser;
+  const auth = getAuth();
   const navigation = useNavigation<NavigationProp<any>>();
+  const [user, setUser] = useState(auth.currentUser);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleSignOut = async () => {
-    try {
-      console.log("çıkıştayız");
-      await auth().signOut();
-      console.log("çıktık");
+    if (!user) {
+      Alert.alert("Çıkış Hatası", "Zaten giriş yapılmamış.");
+      return;
+    }
 
+    try {
+      console.log("Çıkış yapılıyor...");
+
+      await signOut(auth);
+
+      await GoogleSignin.signOut();
+
+      console.log("Çıkış yapıldı!");
       Alert.alert("Çıkış Yapıldı", "Başarıyla çıkış yapıldı.");
 
       navigation.reset({
         index: 0,
-        routes: [{ name: "GoogleSignIn" }],
+        routes: [{ name: "GoogleSignInScreen" }],
       });
 
     } catch (error) {
@@ -26,22 +44,14 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Bilinmeyen Kullanıcı</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Image
-        source={user.photoURL ? { uri: user.photoURL } : require('../assets/images/default_profile_image.jpg')}
+        source={user?.photoURL ? { uri: user.photoURL } : require('../assets/images/default_profile_image.jpg')}
         style={{ width: 100, height: 100, borderRadius: 50 }}
       />
-      <Text>Adı: {user.displayName}</Text>
-      <Text>Email: {user.email}</Text>
+      <Text>Adı: {user?.displayName || "Bilinmiyor"}</Text>
+      <Text>Email: {user?.email || "Bilinmiyor"}</Text>
       <Button title="Çıkış Yap" onPress={handleSignOut} />
     </View>
   );

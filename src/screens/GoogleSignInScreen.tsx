@@ -1,8 +1,22 @@
 import React, { useEffect } from 'react';
 import { View, Button, Alert } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { getAuth, signInWithCredential, GoogleAuthProvider } from 'firebase/auth'; // ✅ Firebase Web SDK kullanılıyor
+import { initializeApp } from 'firebase/app';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBfu13js7QxWQT877fKWPWIs90XBsPXTck",
+  authDomain: "todoevent-5cc7a.firebaseapp.com",
+  projectId: "todoevent-5cc7a",
+  storageBucket: "todoevent-5cc7a.firebasestorage.app",
+  messagingSenderId: "338985090242",
+  appId: "1:338985090242:web:aa88a8c6775fb42f8f8f5b",
+  measurementId: "G-4RGBYLXCJG"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 const GoogleSignInScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -25,15 +39,12 @@ const GoogleSignInScreen: React.FC = () => {
         throw new Error("ID Token alınamadı!");
       }
 
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      await auth().signInWithCredential(googleCredential);
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+
+      await signInWithCredential(auth, googleCredential);
 
       Alert.alert("Başarıyla giriş yapıldı!");
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "MainApp" }],
-      });
+      navigation.navigate("BottomTabNavigator");
 
     } catch (error) {
       console.error("Google Sign-In Error:", error);
