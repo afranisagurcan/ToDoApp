@@ -3,8 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator } from 'react-native';
 import { FirebaseAuthTypes, getAuth, onAuthStateChanged } from '@react-native-firebase/auth';
+import { stackNavigationRef } from './src/navigation/NavigationService';
 import GoogleSignInScreen from './src/screens/GoogleSignInScreen';
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
+import AddTodoScreen from './src/screens/AddTodoScreen';
+import AddEventScreen from './src/screens/AddEventScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,13 +36,16 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={stackNavigationRef}>
       <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="GoogleSignInScreen" component={GoogleSignInScreen} />
         <Stack.Screen name="BottomTabNavigator" component={BottomTabNavigator} />
+        <Stack.Screen name="AddTodo" component={AddTodoScreen} />
+        <Stack.Screen name="AddEvent" component={AddEventScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
+  
 }
 
 export default App;

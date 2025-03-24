@@ -2,15 +2,13 @@ import { db } from '../config/firebaseConfig';
 import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-/**
- * Google ile giriş yapan kullanıcıyı Firestore'a ekler (eğer kayıtlı değilse).
- */
+
 export const registerUserIfNotExists = async () => {
   const auth = getAuth();
   const user = auth.currentUser;
 
   if (!user) {
-    console.error("❌ Kullanıcı oturumu yok.");
+    console.error("Kullanıcı oturumu yok.");
     return;
   }
 
@@ -25,17 +23,13 @@ export const registerUserIfNotExists = async () => {
       photoURL: user.photoURL,
       createdAt: new Date(),
     });
-    console.log('✅ Yeni kullanıcı Firestore\'a eklendi.');
+    console.log('Yeni kullanıcı Firestore\'a eklendi.');
   } else {
-    console.log('ℹ️ Kullanıcı zaten kayıtlı.');
+    console.log('Kullanıcı zaten kayıtlı.');
   }
 };
 
-/**
- * Email adresi ile Firestore'da kullanıcı arar.
- * @param email Aranacak email adresi
- * @returns Kullanıcı bilgisi veya null
- */
+
 export const findUserByEmail = async (email: string) => {
   const normalizedEmail = email.trim().toLowerCase();
 

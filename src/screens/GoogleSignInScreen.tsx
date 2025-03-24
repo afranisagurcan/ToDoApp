@@ -5,6 +5,7 @@ import { getAuth, signInWithCredential, GoogleAuthProvider } from 'firebase/auth
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { registerUserIfNotExists } from '../services/firebaseService';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBfu13js7QxWQT877fKWPWIs90XBsPXTck",
@@ -44,25 +45,9 @@ const GoogleSignInScreen: React.FC = () => {
 
       const googleCredential = GoogleAuthProvider.credential(idToken);
 
-      const userCredential = await signInWithCredential(auth, googleCredential);
-      const user = userCredential.user;
+      await signInWithCredential(auth, googleCredential);
 
-      // Firestore'da kullanıcı var mı kontrol et
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName,
-          photoURL: user.photoURL,
-          createdAt: new Date(),
-        });
-        console.log('✅ Kullanıcı Firestore\'a eklendi.');
-      } else {
-        console.log('ℹ️ Kullanıcı zaten kayıtlı.');
-      }
+      await registerUserIfNotExists();
 
       Alert.alert("Başarıyla giriş yapıldı!");
       navigation.navigate("BottomTabNavigator");
